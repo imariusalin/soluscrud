@@ -24,7 +24,7 @@ class UserObserver
             'limit_group_id' => null,
             'language_id' => $user?->clients()->first()->language_id ?? 1,
             'roles' => [
-                2
+                1
             ],
             'allowed_ips' => null,
         ]);
