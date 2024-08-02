@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'solusvm' => [
+        'api_url' => env('SOLUS_VM_API_URL'),
+        'api_key' => env('SOLUS_VM_API_KEY'),
+    ],
+
 ];

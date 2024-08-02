@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServersController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +17,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/clients', [ClientsController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientsController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientsController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{user}', [ClientsController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{user}/edit', [ClientsController::class, 'edit'])->name('clients.edit');
+    Route::post('/clients/{user}/update', [ClientsController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{user}', [ClientsController::class, 'destroy'])->name('clients.destroy');
+
+    Route::get('/servers', [ServersController::class, 'index'])->name('servers.index');
+    Route::get('/servers/create', [ServersController::class, 'create'])->name('servers.create');
+    Route::post('/servers/solusvm', [ServersController::class, 'store'])->name('servers.store');
+    Route::delete('/servers/{server}', [ServersController::class, 'destroy'])->name('servers.destroy');
+
 });
 
 require __DIR__.'/auth.php';
