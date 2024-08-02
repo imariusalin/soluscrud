@@ -43,7 +43,7 @@
                                     {{ $client['email'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $client->clients->first()->language_id == 1 ? 'English' : 'French' }}
+                                   language
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ ucfirst($client['status']) }}
