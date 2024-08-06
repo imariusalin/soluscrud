@@ -3,11 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Observers\UserObserver;
 
 
 class User extends Authenticatable
@@ -24,7 +22,6 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
-        'solusvm_uid',
     ];
 
     /**
@@ -50,14 +47,5 @@ class User extends Authenticatable
         ];
     }
 
-    public function clients()
-    {
-        return $this->hasMany(Clients::class, 'user_id', 'id');
-    }
-
-    public function servers()
-    {
-        return $this->hasMany(Servers::class, 'user', 'id');
-    }
 
 }

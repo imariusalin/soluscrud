@@ -21,13 +21,23 @@
                             <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Name
                             </th>
-
                             <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Client ID
+                                Status
                             </th>
-
                             <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Client Name
+                                User ID
+                            </th>
+                            <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                User Email
+                            </th>
+                            <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                IP Address
+                            </th>
+                            <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Creation Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Compute Resource Name
                             </th>
                             <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
@@ -35,23 +45,41 @@
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
+                        @if(count($servers) == 0)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colspan="9">
+                                    No servers found
+                                </td>
+                            </tr>
+                        @endif
                         @foreach ($servers as $server)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $server->solus_server_id }}
-
+                                    {{ $server['id'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $server->name }}
+                                    {{ $server['name'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $server->user()->first()->id }}
+                                    {{ $server['status'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $server->user()->first()->name }}
+                                    {{ $server['user']['id'] }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $server['user']['email'] }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $server['ip_addresses']['ipv4']['0']['ip'] ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ \Carbon\Carbon::parse($server['created_at'])->format('Y-m-d H:i:s') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $server['compute_resource_name'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex flex-row gap-2">
-                                    <form action="{{ route('servers.destroy', $server->id) }}" method="POST">
+                                    <form action="{{ route('servers.destroy', $server['id']) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-white hover:text-indigo-900 bg-red-500 rounded p-2">Delete</button>

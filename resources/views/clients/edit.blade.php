@@ -9,20 +9,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form method="POST" action="{{ route('clients.update', $clientData->get('id')) }}">
+                    <form method="POST" action="{{ route('clients.update', $client['data']['id']) }}">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- User Details -->
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                                <input type="text" name="name" id="name" class="mt-1 block w-full" value="{{ old('name', $clientData->get('name')) }}" required>
-                                @error('name')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
-                            </div>
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                                <input type="email" name="email" id="email" class="mt-1 block w-full" value="{{ old('email', $clientData->get('email')) }}" required>
+                                <input type="email" name="email" id="email" class="mt-1 block w-full" value="{{ old('email', $client['data']['email']) }}" required>
                                 @error('email')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                                 @enderror
@@ -36,9 +28,12 @@
                             </div>
                             <div>
                                 <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Language</label>
-                                <select name="language" id="language" class="mt-1 block w-full" required>
-                                    <option value="1" {{ old('language', $clientData->get('clients')[0]['language_id']) == 1 ? 'selected' : '' }}>English</option>
-                                    <option value="2" {{ old('language', $clientData->get('clients')[0]['language_id']) == 2 ? 'selected' : '' }}>French</option>
+                                <select name="language" id="language_id" class="mt-1 block w-full" required>
+                                    @foreach ($languages['data'] as $language)
+                                        <option value="{{ $language['id'] }}" {{ old('language', $client['data']['language']['id']) == $language['id'] ? 'selected' : '' }}>
+                                            {{ $language['name'] }}
+                                        </option>
+                                    @endforeach
                                 </select>
                                 @error('language')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -47,9 +42,9 @@
                             <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                                 <select name="status" id="status" class="mt-1 block w-full" required>
-                                    <option value="active" {{ old('status', $clientData->get('status')) == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="locked" {{ old('status', $clientData->get('status')) == 'locked' ? 'selected' : '' }}>Locked</option>
-                                    <option value="suspended" {{ old('status', $clientData->get('status')) == 'suspended' ? 'selected' : '' }}>Suspended</option>
+                                    <option value="active" {{ old('status', $client['data']['status']) === 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="locked" {{ old('status', $client['data']['status']) === 'locked' ? 'selected' : '' }}>Locked</option>
+                                    <option value="suspended" {{ old('status', $client['data']['status']) === 'suspended' ? 'selected' : '' }}>Suspended</option>
                                 </select>
                                 @error('status')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>

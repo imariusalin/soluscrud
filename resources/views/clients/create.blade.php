@@ -12,14 +12,6 @@
                     <form method="POST" action="{{ route('clients.store') }}">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- User Details -->
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                                <input type="text" name="name" id="name" class="mt-1 block w-full" value="{{ old('name') }}" required>
-                                @error('name')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
-                            </div>
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                                 <input type="email" name="email" id="email" class="mt-1 block w-full" value="{{ old('email') }}" required>

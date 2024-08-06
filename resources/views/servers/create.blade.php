@@ -4,7 +4,6 @@
             {{ __('Create Server') }}
         </h2>
     </x-slot>
-
     <div class="py-12 flex justify-center">
         <div class="max-w-3xl w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-8">
             <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Create Server</h1>
@@ -27,12 +26,9 @@
                     </div>
                     <div>
                         <label for="user" class="block text-sm font-medium text-gray-700 dark:text-gray-300">User ID</label>
-                        @php
-                            $users = \App\Models\User::all();
-                        @endphp
                         <select id="user" name="user" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" required>
-                            @foreach($users as $user)
-                                <option value="{{ $user->solusvm_uid }}" {{ old('user') == $user->solusvm_uid ? 'selected' : '' }}>{{ $user->name }}</option>
+                            @foreach ($solusUsers['data'] as $user)
+                                <option value="{{ $user['id'] }}" {{ old('user') == $user['id'] ? 'selected' : '' }}>{{ $user['email'] }}</option>
                             @endforeach
                         </select>
                         @error('user')
@@ -42,8 +38,15 @@
                     <div>
                         <label for="os" class="block text-sm font-medium text-gray-700 dark:text-gray-300">OS</label>
                         <select id="os" name="os" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" required>
-                            <option value="9" {{ old('os') == 9 ? 'selected' : '' }}>CentOS Stream</option>
-                            <option value="13" {{ old('os') == 13 ? 'selected' : '' }}>Debian 12</option>
+                            @foreach ($osTemplates['data'] as $os)
+                                <optgroup label="{{ $os['name'] }}">
+                                    @foreach ($os['versions'] as $version)
+                                        <option value="{{ $version['id'] }}" {{ old('os') == $version['id'] ? 'selected' : '' }}>
+                                            {{ $os['name'] }} {{ $version['version'] }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
                         </select>
                         @error('os')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -51,7 +54,11 @@
                     </div>
                     <div>
                         <label for="primary_ip" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Primary IP</label>
-                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" id="primary_ip" name="primary_ip" value="{{ old('primary_ip') }}" required>
+                        <select id="primary_ip" name="primary_ip" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" required>
+                            @foreach ($ipBlocks as $ip)
+                                <option value="{{ $ip }}" {{ old('primary_ip') == $ip ? 'selected' : '' }}>{{ $ip }}</option>
+                            @endforeach
+                        </select>
                         @error('primary_ip')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror

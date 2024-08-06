@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Servers;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class SolusService
 {
@@ -18,7 +18,31 @@ class SolusService
         $this->apiKey = config('services.solusvm.api_key');
     }
 
-    public function createUser(array $data,User $user)
+    public function getUsers()
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->apiUrl}/users", [
+                'filter' => [
+                    'role_id' => 2,
+                ],
+            ]);
+
+            if ($response->failed()) {
+                Log::error('Error fetching users: ' . $response->reason());
+                return null;
+            }
+
+            return $response->json();
+        } catch (\Exception $e) {
+            Log::error('Error fetching users: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function createUser(array $data)
     {
         try {
             $response = Http::withHeaders([
@@ -26,18 +50,40 @@ class SolusService
                 'Accept' => 'application/json',
             ])->post("{$this->apiUrl}/users", $data);
 
+            $responseData = $response->json();
+
             if ($response->failed()) {
                 Log::error('Error creating user: ' . $response->reason());
                 return null;
             }
-
-            $id = json_decode($response->body())->data->id;
-            $user->update(['solusvm_uid' => $id]);
-
-
-            return $response->json();
+            return $responseData;
         } catch (\Exception $e) {
             Log::error('Error creating user: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function getUser(int $userId)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->apiUrl}/users/{$userId}");
+
+
+
+            if ($response->failed()) {
+                Log::error('Error fetching user: ' . $response->reason());
+                return null;
+            }
+
+            $data  = $response->json();
+
+            return $response->json();
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching user: ' . $e->getMessage());
             return null;
         }
     }
@@ -45,7 +91,8 @@ class SolusService
     public function updateUser(int $userId, array $data)
     {
         try {
-            Log::info('User updated solusservice: ' . $userId);
+
+            $data = $this->filterNullOrEmpty($data);
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Accept' => 'application/json',
@@ -80,9 +127,10 @@ class SolusService
         }
     }
 
-    public function createServer(array $data,Servers $servers)
+    public function createServer(array $data)
     {
         try {
+
             $payload = [
                 'name' => $data['name'],
                 'location' => 1,
@@ -91,7 +139,7 @@ class SolusService
                 'ssh_keys' => [],
                 'password' => $data['password'],
                 'user' => $data['user'],
-                'project' => 14,
+                'project' => $this->getUserDefaultProject($data['user'])['data'][0]['id'],
                 'backup_settings' => [
                     'enabled' => false,
                     'schedule' => [
@@ -118,20 +166,13 @@ class SolusService
                 'Accept' => 'application/json',
             ])->post("{$this->apiUrl}/servers", $payload);
 
-            $id = json_decode($response->body())->data->id;
 
-            Log::info('Server created solusservice: ' . $id);
+            if ($response->failed()) {
+                Log::error('Error creating server: ' . $response->reason());
+                return null;
+            }
 
-
-            //update solsus_server_id in servers table
-            $servers->update(['solus_server_id' => $id]);
-
-            Log::info('Server created solusservice: ' . $servers->fresh());
-
-
-
-
-
+            return $response->json();
         } catch (\Throwable $e) {
             Log::error('Error creating server: ' . $e->getMessage());
             return null;
@@ -167,4 +208,150 @@ class SolusService
             return null;
         }
     }
+
+
+    public function getLanguages() {
+        $languages = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Accept' => 'application/json',
+        ])->get("{$this->apiUrl}/languages");
+
+        return $languages->json();
+    }
+
+    function filterNullOrEmpty(array $data): array {
+        return array_filter($data, function($value) {
+            return !is_null($value) && $value !== '';
+        });
+    }
+
+
+    public function getAllServers()
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->apiUrl}/servers");
+
+            if ($response->failed()) {
+                Log::error('Error fetching servers: ' . $response->reason());
+                return null;
+            }
+
+            return $response->json();
+        } catch (\Exception $e) {
+            Log::error('Error fetching servers: ' . $e->getMessage());
+            return null;
+        }
+
+    }
+
+    public function listIpBlocks()
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->apiUrl}/ip_blocks");
+
+            if ($response->failed()) {
+                Log::error('Error fetching IP blocks: ' . $response->reason());
+                return null;
+            }
+
+            $ipBlocks = $response->json()['data'];
+            $availableIps = [];
+
+            foreach ($ipBlocks as $block) {
+                $reservedIpsResponse = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Accept' => 'application/json',
+                ])->get("{$this->apiUrl}/ip_blocks/{$block['id']}/ips");
+
+                if ($reservedIpsResponse->failed()) {
+                    Log::error('Error fetching reserved IPs: ' . $reservedIpsResponse->reason());
+                    continue;
+                }
+
+                $reservedIps = array_column($reservedIpsResponse->json()['data'], 'ip');
+
+                list($rangeStart, $rangeEnd) = explode(' - ', $block['total_ips_count']);
+                $rangeStart = ip2long(trim($rangeStart));
+                $rangeEnd = ip2long(trim($rangeEnd));
+
+                for ($ip = $rangeStart; $ip <= $rangeEnd; $ip++) {
+                    $ipStr = long2ip($ip);
+                    if (!in_array($ipStr, $reservedIps)) {
+                        $availableIps[] = $ipStr;
+                    }
+                }
+            }
+
+            return $availableIps;
+        } catch (\Exception $e) {
+            Log::error('Error fetching available IPs: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+
+    public function getOsTemplates()
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->apiUrl}/os_images");
+
+            if ($response->failed()) {
+                Log::error('Error fetching OS: ' . $response->reason());
+                return null;
+            }
+            return $response->json();
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching OS: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+
+    public function getUserDefaultProject(int $userId)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->apiUrl}/users/{$userId}/projects");
+
+            if ($response->failed()) {
+                Log::error('Error fetching user default project: ' . $response->reason());
+                return null;
+            }
+
+            return $response->json();
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching user default project: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+
+    public function userExists($email)
+    {
+        $users = $this->getUsers();
+        if ($users) {
+            foreach ($users['data'] as $user) {
+                if ($user['email'] === $email) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
 }

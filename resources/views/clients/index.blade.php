@@ -10,7 +10,7 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="my-2 mx-2 self-end">
-                    <a href="{{ route('clients.create') }}" class="text-white hover:text-indigo-900 bg-green-500 rounded p-2 self-end">Create New Client</a>
+                        <a href="{{ route('clients.create') }}" class="text-white hover:text-indigo-900 bg-green-500 rounded p-2 self-end">Create New Client</a>
                     </div>
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
@@ -34,7 +34,6 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                         @foreach ($clients as $client)
-
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $client['id'] }}
@@ -43,14 +42,13 @@
                                     {{ $client['email'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                   language
+                                    {{ $client['language'] }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ ucfirst($client['status']) }}
                                 </td>
-
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex flex-row gap-2">
-                                    <a href="{{ route('clients.edit', $client['id']) }}" class="text-black hover:text-indigo-900  bg-green-500 rounded p-2">Edit</a>
+                                    <a href="{{ route('clients.edit', $client['id']) }}" class="text-black hover:text-indigo-900 bg-green-500 rounded p-2">Edit</a>
                                     <form action="{{ route('clients.destroy', $client['id']) }}" method="POST">
                                         @csrf
                                         @method('DELETE')

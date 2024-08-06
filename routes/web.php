@@ -24,15 +24,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/clients', [ClientsController::class, 'index'])->name('clients.index');
     Route::get('/clients/create', [ClientsController::class, 'create'])->name('clients.create');
     Route::post('/clients', [ClientsController::class, 'store'])->name('clients.store');
-    Route::get('/clients/{user}', [ClientsController::class, 'show'])->name('clients.show');
-    Route::get('/clients/{user}/edit', [ClientsController::class, 'edit'])->name('clients.edit');
-    Route::post('/clients/{user}/update', [ClientsController::class, 'update'])->name('clients.update');
-    Route::delete('/clients/{user}', [ClientsController::class, 'destroy'])->name('clients.destroy');
+    Route::get('/clients/{id}', [ClientsController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{id}/edit', [ClientsController::class, 'edit'])->name('clients.edit');
+    Route::post('/clients/{id}/update', [ClientsController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{id}', [ClientsController::class, 'destroy'])->name('clients.destroy');
 
     Route::get('/servers', [ServersController::class, 'index'])->name('servers.index');
     Route::get('/servers/create', [ServersController::class, 'create'])->name('servers.create');
-    Route::post('/servers/solusvm', [ServersController::class, 'store'])->name('servers.store');
-    Route::delete('/servers/{server}', [ServersController::class, 'destroy'])->name('servers.destroy');
+    Route::post('/servers', [ServersController::class, 'store'])->name('servers.store');
+    Route::delete('/servers/{id}', [ServersController::class, 'destroy'])->name('servers.destroy');
 
 });
 

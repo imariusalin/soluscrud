@@ -17,22 +17,7 @@ class ServerCreateRequest extends FormRequest
             'password' => 'required|min:8',
             'os' => 'required',
             'user' => 'required',
-            'primary_ip' => [
-                'required',
-                'ip',
-                function ($attribute, $value, $fail) {
-                    $allowedRange = '10.10.10.';
-                    $lastOctet = (int) substr($value, strrpos($value, '.') + 1);
-                    if (strpos($value, $allowedRange) !== 0 || $lastOctet < 2 || $lastOctet > 253) {
-                        $fail($attribute . ' is not within the allowed range (10.10.10.2 to 10.10.10.253).');
-                    }
-                },
-                function ($attribute, $value, $fail) {
-                    if (Servers::where('primary_ip', $value)->exists()) {
-                        $fail($attribute . ' must be unique. This IP address is already in use.');
-                    }
-                }
-            ],
+            'primary_ip' => 'required',
         ];
     }
 
